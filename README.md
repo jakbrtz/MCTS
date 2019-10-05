@@ -1,9 +1,10 @@
 # simple-MCTS
 This is a [Monte Carlos Tree Search algorithm](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search) for playing simple games of perfect information. 
 
-The entire algorithm and user interface is in a single file: [Program.cs](UltimateTicTacToe/Program.cs)
+The entire algorithm and user interface is in a single file: [Program.cs](MCTS/Program.cs)
 
-In this file, I have programmed it to play the game [Ultimate TicTacToe](https://ultimate-t3.herokuapp.com). You can play by typing the coordinate that you want to play (eg the top-right cell in the top-middle board is 61).
+In this file, I have programmed it to play the game [Ultimate TicTacToe](https://ultimate-t3.herokuapp.com). You can play by typing the coordinate that you want to play (eg the top-right cell in the top-middle board is 61). 
+I have included other games in the other Branches of this Repository.
 
 The MCTS algorithm can be adapted to any game by changing the code where ever it says `FIXME`. 
 The `PickNextMove` function does not contain any places which say `FIXME`. 
