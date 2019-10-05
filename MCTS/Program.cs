@@ -33,10 +33,17 @@ namespace MCTS
                 {
                     if ((Xhuman && gameNode.state.turn == Player.X) || (Ohuman && gameNode.state.turn == Player.O))
                     {
-                        // FIXME: Let the human player pick a move
-                        int x = Console.ReadKey().KeyChar - '1';
-                        int y = Console.ReadKey().KeyChar - '1';
-                        nextMove = Move.ToInt(x, y);
+                        // Let the human pick a move
+                        Console.WriteLine("Waiting for human...");
+                        // Confirm that the human is playing a legal move
+                        nextMove = Move.None;
+                        while (!gameNode.state.MoveIsLegal(nextMove))
+                        {
+                            // FIXME: convert the player's input into a move
+                            int x = Console.ReadKey().KeyChar - '1';
+                            int y = Console.ReadKey().KeyChar - '1';
+                            nextMove = Move.ToInt(x, y);
+                        }
                     }
                     else
                     {
@@ -309,10 +316,12 @@ namespace MCTS
         // Checks that a move can be legally done from this state
         public bool MoveIsLegal(int move)
         {
+            if (move == Move.None) return false;
             // FIXME: write a function that detects whether a move is legal
             int x = move.X();
             int y = move.Y();
             return
+                x >= 0 && x < 9 && y >= 0 && y < 9 &&
                 board[x, y].IsVacant() && (
                 (miniBoard.HasValue && miniBoard.X == x / 3 && miniBoard.Y == y / 3) ||
                 (!miniBoard.HasValue && !MiniFull(x / 3, y / 3) && MiniWinner(x / 3, y / 3) == Player.none)
