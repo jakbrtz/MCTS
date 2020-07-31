@@ -1,35 +1,8 @@
 # simple-MCTS
-This is a [Monte Carlos Tree Search algorithm](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search) for playing simple games of perfect information. 
+This is a [Monte Carlos Tree Search algorithm](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search) for playing simple games of perfect information that don't involve chance.
 
-The entire algorithm and user interface is in a single file: [Program.cs](MCTS/Program.cs)
+This project is made of an abstract class ([MCTS.cs](MCTS/MCTS.cs)) and an example file that shows how to over-write it ([Program.cs](MCTS/Program.cs)).
 
-In this file, I have programmed it to play the game [Ultimate TicTacToe](https://ultimate-t3.herokuapp.com). You can play by typing the coordinate that you want to play (eg the top-right cell in the top-middle board is 61). 
-I have included other games in the other Branches of this Repository.
+In the example file, I have programmed it to play the game Connect Four. You can play by typing the character 1 to 7 to represent which column you want to place a piece in.
 
-The MCTS algorithm can be adapted to any game by changing the code where ever it says `FIXME`. 
-The `PickNextMove` function does not contain any places which say `FIXME`. 
-Instead, it uses helper functions (eg `state.MoveIsLegal` and `state.GameOver`) which need to be modified to represent the game. 
-It also uses integers to represent possible moves.
-
-You can also control the flow of the game with these variables:
-
- * `autoRestart = false;`
-   
-   Does the game automatically restart at the end?
-   
- * `Xhuman = true;`
-   
-   Is a human playing as X?
-   
- * `Ohuman = false;`
-   
-   Is a human playing as O?
-   
- * `simulations = 10000;`
-   
-   How many iterations of the MCTS algorithm are done?
-   
- * `tuningParameter = Math.Sqrt(2);`
-   
-   Lower values favour confirmation that strategies work. Higher values favour exploring new strategies.
-   
+Players and moves are represented by 0-based indexes. For example, in Connect Four there are 2 players (labelled 0 and 1) and 7 moves (labelled 0 to 6). In more complicated games you'll need to find ways to translate more complicated moves into indexes. It doesn't matter if not all indexes represent legal moves, so long as every index is between 0 and an easy-to-calculate number.
