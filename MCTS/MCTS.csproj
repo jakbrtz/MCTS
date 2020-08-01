@@ -43,6 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Examples\ConnectFour.cs" />
+    <Compile Include="Examples\Mancala.cs" />
+    <Compile Include="Examples\OrderAndChaos.cs" />
+    <Compile Include="Examples\UltimateTicTacToe.cs" />
     <Compile Include="MCTS.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

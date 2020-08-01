@@ -18,17 +18,17 @@ namespace MCTS
         /// <summary>
         /// Every node that this could lead to
         /// </summary>
-        public Node[] Children;
+        public Node[] Children { get; private set; }
 
         static private readonly Random rand = new Random();
 
         /// <summary>
         /// Get a random child from this node
         /// </summary>
-        private Node RandomChild(int numberOfMoves)
+        private Node RandomChild()
         {
             List<int> possibleMoves = new List<int>();
-            for (int possibleMove = 0; possibleMove < numberOfMoves; possibleMove++)
+            for (int possibleMove = 0; possibleMove < NumberOfMoves(); possibleMove++)
                 if (MoveIsLegal(possibleMove))
                     possibleMoves.Add(possibleMove);
             int next = possibleMoves[rand.Next(possibleMoves.Count)];
@@ -129,11 +129,11 @@ namespace MCTS
                             current.Children[possibleMove].Parent = current;
                         }
                     }
-                    current = current.RandomChild(NumberOfMoves());
+                    current = current.RandomChild();
                     //Simulation
                     simulated = current;
                     while (simulated.GameInProgress())
-                        simulated = simulated.RandomChild(NumberOfMoves());
+                        simulated = simulated.RandomChild();
                 }
                 int winner = simulated.Winner();
                 //Backpropogation

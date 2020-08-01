@@ -1,154 +1,44 @@
 ﻿using System;
-using MCTS;
+using System.Threading;
 
 namespace MCTSexample
 {
-    class ConnectFourNode : Node
-    {
-        public static readonly int width = 7;
-        public static readonly int height = 6;
-        int[,] board = new int[width, height];
-
-        public ConnectFourNode()
-        {
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    board[x, y] = -1;
-        }
-
-        public string BoardAsString()
-        {
-            string output = "";
-            for (int y = 0; y < height; y++)
-            {
-                output += "|";
-                for (int x = 0; x < width; x++)
-                {
-                    switch (board[x, y])
-                    {
-                        case 0:
-                            output += "X|";
-                            break;
-                        case 1:
-                            output += "O|";
-                            break;
-                        default:
-                            output += " |";
-                            break;
-                    }
-                }
-                output += '\n';
-            }
-            return output;
-        }
-
-        public override Node GetNextState(int move)
-        {
-            int[,] boardClone = (int[,])board.Clone();
-
-            int y = height - 1;
-            while (y >= 0 && boardClone[move, y] != -1) y--;
-            boardClone[move, y] = ActivePlayer;
-
-            return new ConnectFourNode { ActivePlayer = (ActivePlayer + 1) % 2, board = boardClone };
-        }
-
-        public override bool MoveIsLegal(int move)
-        {
-            return move >= 0 && move < width && board[move, 0] == -1;
-        }
-
-        public override int NumberOfMoves()
-        {
-            return width;
-        }
-
-        public override int Winner()
-        {
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    if (board[x, y] == -1)
-                        continue;
-
-                    //Horizontals
-                    if (x + 4 <= width && board[x, y] == board[x + 1, y] && board[x, y] == board[x + 2, y] && board[x, y] == board[x + 3, y])
-                        return board[x, y];
-
-                    //Verticals
-                    if (y + 4 <= height && board[x, y] == board[x, y + 1] && board[x, y] == board[x, y + 2] && board[x, y] == board[x, y + 3])
-                        return board[x, y];
-
-                    //Diagonal \
-                    if (x + 4 <= width && y + 4 <= height && board[x, y] == board[x + 1, y + 1] && board[x, y] == board[x + 2, y + 2] && board[x, y] == board[x + 3, y + 3])
-                        return board[x, y];
-
-                    //Diagonal /
-                    if (x + 4 <= width && y >= 3 && board[x, y] == board[x + 1, y - 1] && board[x, y] == board[x + 2, y - 2] && board[x, y] == board[x + 3, y - 3])
-                        return board[x, y];
-                }
-            }
-
-            return -1;
-        }
-    }
-
     class Program
     {
         static void Main()
         {
-            while (true)
+            Console.WriteLine("Pick a game to play:");
+            Console.WriteLine();
+            Console.WriteLine("1. Connect Four");
+            Console.WriteLine("2. Mancala");
+            Console.WriteLine("3. Order and Chaos");
+            Console.WriteLine("4. Ultimate Tic Tac Toe");
+
+            switch (Console.ReadKey().KeyChar)
             {
-                Node gameNode = new ConnectFourNode();
-                Draw(gameNode);
-
-                while (gameNode.GameInProgress())
-                {
-                    int nextMove = -1;
-
-                    if (gameNode.ActivePlayer == 0)
-                    {
-                        while (!gameNode.MoveIsLegal(nextMove))
-                        {
-                            Console.WriteLine("Please pick a move...");
-                            nextMove = Console.ReadKey().KeyChar - '1';
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Thinking...");
-                        nextMove = gameNode.PickNextMove();
-                    }
-
-                    gameNode = gameNode.DoMove(nextMove);
-                    Draw(gameNode, nextMove);
-                }
-
-                Console.WriteLine(GetPlayerName(gameNode.Winner()) + " wins");
-                Console.ReadKey();
-            }
-
-            void Draw(Node node, int recentMove = -1)
-            {
-                Console.Clear();
-                Console.Write((node as ConnectFourNode).BoardAsString());
-                Console.WriteLine();
-                Console.WriteLine();
-                if (node.Parent != null)
-                {
-                    Console.WriteLine(GetPlayerName(node.Parent.ActivePlayer) + " played " + (recentMove + 1));
-                }
-            }
-
-            string GetPlayerName(int player)
-            {
-                switch (player)
-                {
-                    case 0: return "X";
-                    case 1: return "O";
-                    default: return "No one";
-                }
+                case '1':
+                    Console.WriteLine("A simple example of a game that can be made using this code.");
+                    Console.WriteLine("There are 7 moves you can do, and this can be done by pressing keys 1-7");
+                    Thread.Sleep(5000);
+                    ConnectFour.Play();
+                    break;
+                case '2':
+                    Console.WriteLine("Another simple example of a game that can be made using this code.");
+                    Console.WriteLine("There are 6 moves you can do, and this can be done by pressing keys 1-7");
+                    Thread.Sleep(5000);
+                    Mancala.Play();
+                    break;
+                case '3':
+                    Console.WriteLine("A more complicated game where a move has multiple components");
+                    Console.WriteLine("First press a digit to represent the X component, then the Y component, then an X or O");
+                    Thread.Sleep(5000);
+                    OrderAndChaos.Play();
+                    break;
+                case '4':
+                    Console.WriteLine("A more complicated game where a move has multiple components, and there are heavier restrictions on where you can move");
+                    Console.WriteLine("First press a digit to represent the X component, then the Y component");
+                    UltimateTicTacToe.Play();
+                    break;
             }
         }
     }
