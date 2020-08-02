@@ -1,10 +1,118 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Threading;
+using System.Windows.Forms;
 using MCTS;
 
 namespace MCTSexample
 {
+    public partial class Mancala : Form
+    {
+        public Mancala()
+        {
+            InitializeComponent();
+        }
+
+        int computerPlayer = 1;
+
+        private void Mancala_Load(object sender, EventArgs e)
+        {
+            MessageBox.Show("Click \"new game\" to start");
+        }
+
+        private void BTNrestartH_Click(object sender, EventArgs e)
+        {
+            computerPlayer = 1;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void BTNrestartC_Click(object sender, EventArgs e)
+        {
+            computerPlayer = 0;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private readonly ManualResetEvent waitForHumanMove = new ManualResetEvent(false);
+        private int moveFromButton = -1;
+
+        void Draw()
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                foreach (Button button in new Button[] { BTN10, BTN11, BTN12, BTN13, BTN14, BTN15, BTN16, BTN20, BTN21, BTN22, BTN23, BTN24, BTN25, BTN26 })
+                    button.Text = gameNode.board[CBXflip.Checked == (computerPlayer == 1) == (button.Name[3] == '1') ? 1 : 0, button.Name[4] - '0'].ToString();
+            });
+        }
+
+        void Log(string s1, string s2, string s3)
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                dataGridView1.Rows.Add(s1, s2, s3);
+                dataGridView1.FirstDisplayedScrollingRowIndex = dataGridView1.RowCount - 1;
+            });
+        }
+
+        private void BTN_Click(object sender, EventArgs e)
+        {
+            if (CBXflip.Checked != ((sender as Button).Name[3] == '1'))
+            {
+                moveFromButton = (sender as Button).Name[4] - '0' - 1;
+                waitForHumanMove.Set();
+            }
+        }
+
+        MancalaNode gameNode;
+
+        private void BackgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            gameNode = new MancalaNode();
+            Draw();
+
+            while (gameNode.GameInProgress())
+            {
+                int nextMove = -1;
+
+                if (gameNode.ActivePlayer == computerPlayer)
+                {
+                    nextMove = gameNode.PickNextMove((int)NUDsimulations.Value);
+                }
+                else
+                {
+                    while (!gameNode.MoveIsLegal(nextMove))
+                    {
+                        waitForHumanMove.WaitOne();
+                        nextMove = moveFromButton;
+                        moveFromButton = -1;
+                    }
+                }
+
+                int previousPlayer = gameNode.ActivePlayer;
+                gameNode = gameNode.DoMove(nextMove) as MancalaNode;
+                Draw();
+                Log(previousPlayer == computerPlayer ? "Computer" : "Human",
+                    (nextMove + 1).ToString() + (gameNode.ActivePlayer == previousPlayer ? ", Go Again" : ""),
+                    (gameNode.Weight() * (previousPlayer == computerPlayer ? 50 : -50) + 50).ToString("0.00") + "%"); // weight usually displays a number from -1 to 1
+            }
+
+            int scoreC = gameNode.board[computerPlayer, 0];
+            int scoreH = gameNode.board[1 - computerPlayer, 0];
+            Log("", "", "");
+            if (scoreC > scoreH)
+                Log("Computer", "Wins", scoreC.ToString() + " - " + scoreH.ToString());
+            else if (scoreH > scoreC)
+                Log("Human", "Wins", scoreH.ToString() + " - " + scoreC.ToString());
+            else
+                Log("Tie", "", scoreH.ToString() + " - " + scoreC.ToString());
+            Log("", "", "");
+        }
+
+        private void CBXflip_CheckedChanged(object sender, EventArgs e)
+        {
+            Draw();
+        }
+    }
+
     class MancalaNode : Node
     {
         public byte[,] board = { { 0, 4, 4, 4, 4, 4, 4 }, { 0, 4, 4, 4, 4, 4, 4 } };
@@ -42,7 +150,7 @@ namespace MCTSexample
                     nextBoard[player, 0] += nextBoard[1 - player, 7 - move];
                     nextBoard[1 - player, 7 - move] = 0;
                 }
-                player = (player + 1)%2;
+                player = (player + 1) % 2;
             }
 
             bool noreallyended = false;
@@ -87,91 +195,6 @@ namespace MCTSexample
             if (diff > 0) return 0;
             if (diff < 0) return 1;
             return -1;
-        }
-
-        public string BoardAsString()
-        {
-            string output = "";
-
-            output += "   ";
-            for (int i = 0; i < 6; i++)
-                output += "| " + board[1, i+1].ToString("D2") + " ";
-            output += "|   \n";
-            output += board[1, 0].ToString("D2") + " +----+----+----+----+----+----+ " + board[0, 0].ToString("D2") + "\n";
-            output += "   ";
-            for (int i = 0; i < 6; i++)
-                output += "| " + board[0, 6 - i].ToString("D2") + " ";
-            output += "|   ";
-
-            return output;
-        }
-    }
-
-    class Mancala
-    {
-        public static void Play()
-        {
-            while (true)
-            {
-                List<int> moveLog = new List<int>();
-                int previousPlayer = -1;
-
-                Node gameNode = new MancalaNode();
-                Draw(gameNode, moveLog);
-
-                while (gameNode.GameInProgress())
-                {
-                    if (previousPlayer != gameNode.ActivePlayer) 
-                        moveLog.Clear();
-                    previousPlayer = gameNode.ActivePlayer;
-
-                    int nextMove = -1;
-
-                    if (gameNode.ActivePlayer == 0)
-                    {
-                        while (!gameNode.MoveIsLegal(nextMove))
-                        {
-                            Console.WriteLine("Please pick a move...");
-                            nextMove = Console.ReadKey().KeyChar - '1';
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Thinking...");
-                        nextMove = gameNode.PickNextMove();
-                    }
-
-                    gameNode = gameNode.DoMove(nextMove);
-                    moveLog.Add(nextMove + 1);
-                    Draw(gameNode, moveLog);
-                }
-
-                Console.WriteLine(GetPlayerName(gameNode.Winner()) + " wins");
-                Console.ReadKey();
-            }
-
-            void Draw(Node node, List<int> recentMoves)
-            {
-                Console.Clear();
-                Console.Write((node as MancalaNode).BoardAsString());
-                Console.WriteLine();
-                Console.WriteLine();
-                if (node.Parent != null)
-                {
-                    Console.WriteLine(GetPlayerName(node.Parent.ActivePlayer) + " played " + string.Join(", ", recentMoves));
-                }
-
-            }
-
-            string GetPlayerName(int player)
-            {
-                switch (player)
-                {
-                    case 0: return "Player 1";
-                    case 1: return "Player 2";
-                    default: return "No one";
-                }
-            }
         }
     }
 }

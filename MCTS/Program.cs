@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using System.Windows.Forms;
 
 namespace MCTSexample
 {
@@ -18,25 +18,27 @@ namespace MCTSexample
             {
                 case '1':
                     Console.WriteLine("A simple example of a game that can be made using this code.");
-                    Console.WriteLine("There are 7 moves you can do, and this can be done by pressing keys 1-7");
-                    Thread.Sleep(5000);
+                    Console.WriteLine("Make a move by pressing keys 1-7");
+                    Console.ReadKey();
                     ConnectFour.Play();
                     break;
                 case '2':
-                    Console.WriteLine("Another simple example of a game that can be made using this code.");
-                    Console.WriteLine("There are 6 moves you can do, and this can be done by pressing keys 1-7");
-                    Thread.Sleep(5000);
-                    Mancala.Play();
+                    Console.WriteLine("A simple example of a how to apply this code to a form");
+                    Console.WriteLine("Make a move by clicking the buttons on the screen");
+                    Console.ReadKey();
+                    Application.EnableVisualStyles();
+                    Application.Run(new Mancala());
                     break;
                 case '3':
                     Console.WriteLine("A more complicated game where a move has multiple components");
                     Console.WriteLine("First press a digit to represent the X component, then the Y component, then an X or O");
-                    Thread.Sleep(5000);
+                    Console.ReadKey();
                     OrderAndChaos.Play();
                     break;
                 case '4':
                     Console.WriteLine("A more complicated game where a move has multiple components, and there are heavier restrictions on where you can move");
                     Console.WriteLine("First press a digit to represent the X component, then the Y component");
+                    Console.ReadKey();
                     UltimateTicTacToe.Play();
                     break;
             }

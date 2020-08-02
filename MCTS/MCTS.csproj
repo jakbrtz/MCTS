@@ -35,6 +35,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,7 +46,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Examples\ConnectFour.cs" />
-    <Compile Include="Examples\Mancala.cs" />
+    <Compile Include="Examples\Mancala.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Examples\Mancala.Designer.cs">
+      <DependentUpon>Mancala.cs</DependentUpon>
+    </Compile>
     <Compile Include="Examples\OrderAndChaos.cs" />
     <Compile Include="Examples\UltimateTicTacToe.cs" />
     <Compile Include="MCTS.cs" />
@@ -53,6 +60,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Examples\Mancala.resx">
+      <DependentUpon>Mancala.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

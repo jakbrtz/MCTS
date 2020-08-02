@@ -44,7 +44,7 @@ namespace MCTS
         /// <summary>
         /// How likely this node is to lead to a success from the perspective of the Parent's active player
         /// </summary>
-        private double Weight()
+        public double Weight()
         {
             return (double)score / visits;
         }
