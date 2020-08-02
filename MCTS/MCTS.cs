@@ -28,7 +28,8 @@ namespace MCTS
         private Node RandomChild()
         {
             List<int> possibleMoves = new List<int>();
-            for (int possibleMove = 0; possibleMove < NumberOfMoves(); possibleMove++)
+            int numberOfMoves = NumberOfMoves();
+            for (int possibleMove = 0; possibleMove < numberOfMoves; possibleMove++)
                 if (MoveIsLegal(possibleMove))
                     possibleMoves.Add(possibleMove);
             int next = possibleMoves[rand.Next(possibleMoves.Count)];
@@ -68,6 +69,7 @@ namespace MCTS
         public abstract bool MoveIsLegal(int move);
         /// <summary>
         /// Each move from this node is given a 0-based index. This should return 1+ the largest index
+        /// This should result in a constant value. It doesn't matter if not all of the indexes refer to legal moves
         /// </summary>
         public abstract int NumberOfMoves();
         /// <summary>
@@ -80,11 +82,17 @@ namespace MCTS
         public virtual bool GameInProgress()
         {
             if (Winner() != -1) return false;
-            for (int move = 0; move < NumberOfMoves(); move++)
+            int numberOfMoves = NumberOfMoves();
+            for (int move = 0; move < numberOfMoves; move++)
                 if (MoveIsLegal(move))
                     return true;
             return false;
         }
+
+        /// <summary>
+        /// There exists a strategy that this player could use that would guarantee a win. If -1, then a strategy hasn't been found.
+        /// </summary>
+        public int PlayerThatCanForceWin { get; private set; } = -1;
 
         /// <summary>
         /// Pick a move for the current player to made. This algorithm uses the Monte Carlos Tree Search Algorithm (MCTS), using the Upper Confidence Bound (UCB) 
@@ -95,16 +103,21 @@ namespace MCTS
         /// <returns>An index which represents a recommended move</returns>
         public int PickNextMove(int Simulations = 10000, double TuningParameter = 1.4142)
         {
+            if (PlayerThatCanForceWin == ActivePlayer) 
+                Simulations = 0;
+
             for (int i = 0; i < Simulations; i++)
             {
                 //Selection
                 Node current = this;
-                while (current.Children != null)
+                while (current.Children != null && current.PlayerThatCanForceWin != ActivePlayer)
                 {
                     double bestUCB = double.MinValue;
                     Node nextNode = null;
-                    foreach (Node child in current.Children)
+                    Node child;
+                    for (int move = 0; move < current.Children.Length; move++)
                     {
+                        child = current.Children[move];
                         if (child == null) continue;
                         double childUCB = child.Weight() + TuningParameter * Math.Sqrt(Math.Log(current.visits) / child.visits);
                         if (childUCB > bestUCB)
@@ -117,11 +130,11 @@ namespace MCTS
                 }
                 //Check the game isn't over
                 Node simulated = current;
-                if (current.GameInProgress())
+                if (current.GameInProgress() && current.PlayerThatCanForceWin != ActivePlayer)
                 {
                     //Expansion
-                    current.Children = new Node[NumberOfMoves()];
-                    for (int possibleMove = 0; possibleMove < NumberOfMoves(); possibleMove++)
+                    current.Children = new Node[current.NumberOfMoves()];
+                    for (int possibleMove = 0; possibleMove < current.Children.Length; possibleMove++)
                     {
                         if (current.MoveIsLegal(possibleMove))
                         {
@@ -137,13 +150,44 @@ namespace MCTS
                 }
                 int winner = simulated.Winner();
                 //Backpropogation
+                bool checkingForForcedWin = simulated == current;
+                if (checkingForForcedWin)
+                {
+                    if (winner == -1)
+                        winner = current.PlayerThatCanForceWin;
+                    else
+                        current.PlayerThatCanForceWin = winner;
+                }
                 while (current != this)
                 {
                     current.visits++;
                     if (current.Parent.ActivePlayer == winner)
+                    {
                         current.score++;
+                        if (checkingForForcedWin)
+                        {
+                            current.Parent.PlayerThatCanForceWin = winner;
+                        }
+                    }
                     else if (winner != -1)
+                    {
                         current.score--;
+                        if (checkingForForcedWin)
+                        {
+                            bool AllSiblingsForceWin()
+                            {
+                                for (int s = 0; s < current.Parent.Children.Length; s++)
+                                    if (current.Parent.Children[s] != null && current.Parent.Children[s].PlayerThatCanForceWin != winner)
+                                        return false;
+                                return true;
+                            }
+
+                            if (AllSiblingsForceWin())
+                                current.Parent.PlayerThatCanForceWin = winner;
+                            else
+                                checkingForForcedWin = false;
+                        }
+                    }
                     current = current.Parent;
                 }
                 current.visits++;
@@ -153,13 +197,20 @@ namespace MCTS
             double bestWeight = double.MinValue;
             int selectedMove = -1;
 
-            for (int possibleMove = 0; possibleMove < NumberOfMoves(); possibleMove++)
+            for (int possibleMove = 0; possibleMove < Children.Length; possibleMove++)
             {
                 Node child = Children[possibleMove];
-                if (child != null && child.Weight() > bestWeight)
+                if (child != null)
                 {
-                    bestWeight = child.Weight();
-                    selectedMove = possibleMove;
+                    if (child.PlayerThatCanForceWin == ActivePlayer)
+                    {
+                        return possibleMove;
+                    }
+                    if (child.Weight() > bestWeight) 
+                    {
+                        bestWeight = child.Weight();
+                        selectedMove = possibleMove;
+                    }
                 }
             }
             if (selectedMove == -1) throw new IndexOutOfRangeException("No move was selected");

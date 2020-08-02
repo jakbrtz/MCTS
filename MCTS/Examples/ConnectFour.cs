@@ -107,6 +107,7 @@ namespace MCTSexample
         {
             while (true)
             {
+                bool hasUsedTaunt = false;
                 Node gameNode = new ConnectFourNode();
                 Draw(gameNode);
 
@@ -118,7 +119,15 @@ namespace MCTSexample
                     {
                         while (!gameNode.MoveIsLegal(nextMove))
                         {
-                            Console.WriteLine("Please pick a move...");
+                            if (!hasUsedTaunt && gameNode.PlayerThatCanForceWin == 1)
+                            {
+                                Console.WriteLine("I'm going to win and there's nothing you can do to stop me");
+                                hasUsedTaunt = true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Please pick a move...");
+                            }
                             nextMove = Console.ReadKey().KeyChar - '1';
                         }
                     }
