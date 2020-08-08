@@ -13,6 +13,7 @@ namespace MCTSexample
             Console.WriteLine("2. Mancala");
             Console.WriteLine("3. Order and Chaos");
             Console.WriteLine("4. Ultimate Tic Tac Toe");
+            Console.WriteLine("5. Reversi");
 
             switch (Console.ReadKey().KeyChar)
             {
@@ -40,6 +41,13 @@ namespace MCTSexample
                     Console.WriteLine("First press a digit to represent the X component, then the Y component");
                     Console.ReadKey();
                     UltimateTicTacToe.Play();
+                    break;
+                case '5':
+                    Console.WriteLine("A more complicated game where the game has a UI");
+                    Console.WriteLine("Click where you want to place a piece");
+                    Console.ReadKey();
+                    Application.EnableVisualStyles();
+                    Application.Run(new Reversi());
                     break;
             }
         }
