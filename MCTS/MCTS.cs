@@ -240,4 +240,98 @@ namespace MCTS
             }
         }
     }
+
+    public abstract class ConsoleGamePlay
+    {
+        /// <summary>
+        /// Starts a game from a given Node
+        /// </summary>
+        public void Play(Node gameNode)
+        {
+            Draw(gameNode);
+
+            while (gameNode.GameInProgress())
+            {
+                int player = gameNode.ActivePlayer;
+                int nextMove = -1;
+
+                if (IsHumanTurn(gameNode))
+                {
+                    while (!gameNode.MoveIsLegal(nextMove) || nextMove < 0 || nextMove >= gameNode.NumberOfMoves())
+                    {
+                        nextMove = GetHumanMove(gameNode);
+                    }
+                }
+                else
+                {
+                    nextMove = GetComputerMove(gameNode);
+                }
+
+                gameNode = gameNode.DoMove(nextMove);
+                Draw(gameNode, player, nextMove);
+            }
+
+            ReportWinner(gameNode);
+        }
+
+        /// <summary>
+        /// Draws node and extra information about the most recent move
+        /// </summary>
+        void Draw(Node node, int recentPlayer = -1, int recentMove = -1)
+        {
+            Console.Clear();
+            Console.WriteLine(BoardToString(node));
+            Console.WriteLine();
+            Console.WriteLine();
+            if (recentMove != -1)
+            {
+                Console.WriteLine(GetPlayerName(recentPlayer) + " played " + MoveToString(recentMove));
+            }
+        }
+
+        /// <summary>
+        /// Gets a description of a player given their index
+        /// </summary>
+        public abstract string GetPlayerName(int player);
+
+        /// <summary>
+        /// Gets a string description of the board
+        /// </summary>
+        public abstract string BoardToString(Node node);
+
+        /// <summary>
+        /// Gets a description of a move from its index
+        /// </summary>
+        public abstract string MoveToString(int move);
+
+        /// <summary>
+        /// Asks the user to enter data that represents a move, and convert it to an index
+        /// </summary>
+        public abstract int GetHumanMove(Node node);
+
+        /// <summary>
+        /// Checks whether the human should go next or the computer
+        /// </summary>
+        public virtual bool IsHumanTurn(Node node)
+        {
+            return node.ActivePlayer == 0;
+        }
+
+        /// <summary>
+        /// Get the computer to pick a move
+        /// </summary>
+        public virtual int GetComputerMove(Node node)
+        {
+            Console.WriteLine("Thinking...");
+            return node.PickNextMove();
+        }
+
+        /// <summary>
+        /// Display a message stating the game is over
+        /// </summary>
+        public virtual void ReportWinner(Node node)
+        {
+            Console.WriteLine(GetPlayerName(node.Winner()) + " wins");
+        }
+    }
 }

@@ -8,6 +8,8 @@ namespace MCTSexample
         public int[,] board = new int[9, 9];
         MiniCoord miniBoard;
 
+        public int GetPiece(int x, int y) => board[x, y];
+
         struct MiniCoord
         {
             private int value;
@@ -79,8 +81,8 @@ namespace MCTSexample
             int[,] nextBoard = (int[,])board.Clone();
             MiniCoord nextCoord = miniBoard;
 
-            int x = move.X();
-            int y = move.Y();
+            int x = move / 9;
+            int y = move % 9;
 
             nextBoard[x, y] = ActivePlayer;
             nextCoord.Set(x % 3, y % 3);
@@ -92,9 +94,8 @@ namespace MCTSexample
 
         public override bool MoveIsLegal(int move)
         {
-            if (move == UltimateTicTacToeMove.None) return false;
-            int x = move.X();
-            int y = move.Y();
+            int x = move / 9;
+            int y = move % 9;
             return
                 x >= 0 && x < 9 && y >= 0 && y < 9 &&
                 board[x, y]==-1 && (
@@ -136,8 +137,20 @@ namespace MCTSexample
 
             return -1;
         }
+    }
 
-        public string BoardAsString()
+    class UltimateTicTacToe : ConsoleGamePlay
+    {
+        public static void Play()
+        {
+            while (true)
+            {
+                new UltimateTicTacToe().Play(new UltimateTicTacToeNode());
+                Console.ReadKey();
+            }
+        }
+
+        public override string BoardToString(Node node)
         {
             string output = "";
             for (int y = 0; y < 9; y++)
@@ -154,7 +167,7 @@ namespace MCTSexample
                     else
                         output += "|";
 
-                    switch (board[x, y])
+                    switch ((node as UltimateTicTacToeNode).GetPiece(x, y))
                     {
                         case 0:
                             output += "X";
@@ -171,115 +184,40 @@ namespace MCTSexample
             }
             return output;
         }
-    }
 
-    public static class UltimateTicTacToeMove
-    {
-        // `Range` is the number of possible moves
-        // FIXME: adjust this number to represent the range
-        public static readonly int Range = 9 * 9;
-        // `None` represents no move
-        public static readonly int None = -1;
-
-        // FIXME: write a function that describes a move that has been played
-        public static string Description(this int move)
+        public override int GetHumanMove(Node node)
         {
-            string output = "";
-            if (move.Y() / 3 == 0) output += "Top";
-            if (move.Y() / 3 == 2) output += "Bottom";
-            if (move.X() / 3 == 0) output += "Left";
-            if (move.X() / 3 == 2) output += "Right";
-            if (move.X() / 3 == 1 && move.Y() / 3 == 1) output += "Center";
-            output += " ";
-            if (move.Y() % 3 == 0) output += "Top";
-            if (move.Y() % 3 == 2) output += "Bottom";
-            if (move.X() % 3 == 0) output += "Left";
-            if (move.X() % 3 == 2) output += "Right";
-            if (move.X() % 3 == 1 && move.Y() % 3 == 1) output += "Center";
-            return output;
-        }
-
-        /* This function is only used to convert a player's move into a number
-         * It is only used once in Program.Main, but I believe that it belongs here
-         * FIXME: convert player input into a move. Or don't. This is just a helper function.
-         */
-        public static int ToInt(int x, int y)
-        {
+            Console.WriteLine("Please pick a move...");
+            int x = Console.ReadKey().KeyChar - '1';
+            int y = Console.ReadKey().KeyChar - '1';
             return 9 * x + y;
         }
 
-        // FIXME: helper functions that convert integers to moves
-
-        public static int X(this int move)
+        public override string GetPlayerName(int player)
         {
-            return move / 9;
+            switch (player)
+            {
+                case 0: return "X";
+                case 1: return "O";
+                default: return "No one";
+            }
         }
 
-        public static int Y(this int move)
+        public override string MoveToString(int move)
         {
-            return move % 9;
-        }
-
-    }
-
-    class UltimateTicTacToe
-    {
-        public static void Play()
-        {
-            while (true)
-            {
-                Node gameNode = new UltimateTicTacToeNode();
-                Draw(gameNode);
-
-                while (gameNode.GameInProgress())
-                {
-                    int nextMove = -1;
-
-                    if (gameNode.ActivePlayer == 0)
-                    {
-                        while (!gameNode.MoveIsLegal(nextMove))
-                        {
-                            Console.WriteLine("Please pick a move...");
-                            int x = Console.ReadKey().KeyChar - '1';
-                            int y = Console.ReadKey().KeyChar - '1';
-                            nextMove = UltimateTicTacToeMove.ToInt(x, y);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Thinking...");
-                        nextMove = gameNode.PickNextMove();
-                    }
-
-                    gameNode = gameNode.DoMove(nextMove);
-                    Draw(gameNode, nextMove);
-                }
-
-                Console.WriteLine(GetPlayerName(gameNode.Winner()) + " wins");
-                Console.ReadKey();
-            }
-
-            void Draw(Node node, int recentMove = -1)
-            {
-                Console.Clear();
-                Console.Write((node as UltimateTicTacToeNode).BoardAsString());
-                Console.WriteLine();
-                Console.WriteLine();
-                if (node.Parent != null)
-                {
-                    Console.WriteLine(GetPlayerName(node.Parent.ActivePlayer) + " played " + recentMove.Description());
-                }
-            }
-
-            string GetPlayerName(int player)
-            {
-                switch (player)
-                {
-                    case 0: return "X";
-                    case 1: return "O";
-                    default: return "No one";
-                }
-            }
+            string output = "";
+            if (move % 9 / 3 == 0) output += "Top";
+            if (move % 9 / 3 == 2) output += "Bottom";
+            if (move / 9 / 3 == 0) output += "Left";
+            if (move / 9 / 3 == 2) output += "Right";
+            if (move / 9 / 3 == 1 && move % 9 / 3 == 1) output += "Center";
+            output += " ";
+            if (move % 9 % 3 == 0) output += "Top";
+            if (move % 9 % 3 == 2) output += "Bottom";
+            if (move / 9 % 3 == 0) output += "Left";
+            if (move / 9 % 3 == 2) output += "Right";
+            if (move / 9 % 3 == 1 && move % 9 % 3 == 1) output += "Center";
+            return output;
         }
     }
 }

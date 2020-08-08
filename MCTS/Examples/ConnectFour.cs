@@ -13,37 +13,13 @@ namespace MCTSexample
         public static readonly int height = 6;
         int[,] board = new int[width, height];
 
+        public int GetPiece(int x, int y) => board[x, y];
+
         public ConnectFourNode()
         {
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                     board[x, y] = -1;
-        }
-
-        public string BoardAsString()
-        {
-            string output = "";
-            for (int y = 0; y < height; y++)
-            {
-                output += "|";
-                for (int x = 0; x < width; x++)
-                {
-                    switch (board[x, y])
-                    {
-                        case 0:
-                            output += "X|";
-                            break;
-                        case 1:
-                            output += "O|";
-                            break;
-                        default:
-                            output += " |";
-                            break;
-                    }
-                }
-                output += '\n';
-            }
-            return output;
         }
 
         public override Node GetNextState(int move)
@@ -100,72 +76,72 @@ namespace MCTSexample
         }
     }
 
-
-    class ConnectFour
+    class ConnectFour : ConsoleGamePlay
     {
         public static void Play()
         {
             while (true)
             {
-                bool hasUsedTaunt = false;
-                Node gameNode = new ConnectFourNode();
-                Draw(gameNode);
-
-                while (gameNode.GameInProgress())
-                {
-                    int nextMove = -1;
-
-                    if (gameNode.ActivePlayer == 0)
-                    {
-                        while (!gameNode.MoveIsLegal(nextMove))
-                        {
-                            if (!hasUsedTaunt && gameNode.PlayerThatCanForceWin == 1)
-                            {
-                                Console.WriteLine("I'm going to win and there's nothing you can do to stop me");
-                                hasUsedTaunt = true;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Please pick a move...");
-                            }
-                            nextMove = Console.ReadKey().KeyChar - '1';
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Thinking...");
-                        nextMove = gameNode.PickNextMove();
-                    }
-
-                    gameNode = gameNode.DoMove(nextMove);
-                    Draw(gameNode, nextMove);
-                }
-
-                Console.WriteLine(GetPlayerName(gameNode.Winner()) + " wins");
+                new ConnectFour().Play(new ConnectFourNode());
                 Console.ReadKey();
             }
+        }
 
-            void Draw(Node node, int recentMove = -1)
-            {
-                Console.Clear();
-                Console.Write((node as ConnectFourNode).BoardAsString());
-                Console.WriteLine();
-                Console.WriteLine();
-                if (node.Parent != null)
-                {
-                    Console.WriteLine(GetPlayerName(node.Parent.ActivePlayer) + " played " + (recentMove + 1));
-                }
-            }
+        bool hasUsedTaunt = false;
 
-            string GetPlayerName(int player)
+        public override string BoardToString(Node node)
+        {
+            string output = "";
+            for (int y = 0; y < ConnectFourNode.height; y++)
             {
-                switch (player)
+                output += "|";
+                for (int x = 0; x < ConnectFourNode.width; x++)
                 {
-                    case 0: return "X";
-                    case 1: return "O";
-                    default: return "No one";
+                    switch ((node as ConnectFourNode).GetPiece(x, y))
+                    {
+                        case 0:
+                            output += "X|";
+                            break;
+                        case 1:
+                            output += "O|";
+                            break;
+                        default:
+                            output += " |";
+                            break;
+                    }
                 }
+                output += '\n';
             }
+            return output;
+        }
+
+        public override int GetHumanMove(Node node)
+        {
+            if (!hasUsedTaunt && node.PlayerThatCanForceWin == 1)
+            {
+                Console.WriteLine("I'm going to win and there's nothing you can do to stop me");
+                hasUsedTaunt = true;
+            }
+            else
+            {
+                Console.WriteLine("Please pick a move...");
+            }
+            return Console.ReadKey().KeyChar - '1';
+        }
+
+        public override string GetPlayerName(int player)
+        {
+            switch (player)
+            {
+                case 0: return "X";
+                case 1: return "O";
+                default: return "No one";
+            }
+        }
+
+        public override string MoveToString(int move)
+        {
+            return (move + 1).ToString();
         }
     }
 }
