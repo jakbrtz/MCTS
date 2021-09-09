@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MCTSexample
+namespace Examples
 {
     class OrderAndChaosNode : Node
     {

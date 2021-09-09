@@ -1,7 +1,7 @@
 ﻿using System;
 using MCTS;
 
-namespace MCTSexample
+namespace Examples
 {
     class UltimateTicTacToeNode : Node
     {

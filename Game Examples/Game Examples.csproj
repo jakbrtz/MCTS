@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2BA30B8E-7BC5-4180-8409-F878DDEDBFE7}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>MCTS</RootNamespace>
-    <AssemblyName>MCTS</AssemblyName>
+    <ProjectGuid>{A48E1EA4-2117-47EB-AFB8-E654A2776D3F}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Game_Examples</RootNamespace>
+    <AssemblyName>Game Examples</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,12 +32,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,11 +45,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MCTS.cs" />
+    <Compile Include="ConnectFour.cs" />
+    <Compile Include="Mancala.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Mancala.designer.cs">
+      <DependentUpon>Mancala.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OrderAndChaos.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reversi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reversi.designer.cs">
+      <DependentUpon>Reversi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UltimateTicTacToe.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mancala.resx">
+      <DependentUpon>Mancala.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reversi.resx">
+      <DependentUpon>Reversi.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MCTS\MCTS.csproj">
+      <Project>{2BA30B8E-7BC5-4180-8409-F878DDEDBFE7}</Project>
+      <Name>MCTS</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

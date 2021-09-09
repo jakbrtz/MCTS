@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MCTS;
 
-namespace MCTSexample
+namespace Examples
 {
     class ConnectFourNode : Node
     {
